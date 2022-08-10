@@ -1,13 +1,68 @@
-body {
+*{
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+ 
+}
+body{
+  background-image: url('../public/assets/bg.png');
+  background-position: center;
+    background-repeat: repeat;
+    background-size: cover;
+}
+.design {
+  width: 100%;
+  position: absolute;
+  display: grid;
+  grid-column: auto;
+  align-items: center;
+  justify-content: center;
+  top: 20px;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.number{
+  background-color: rgba(255, 194, 9, 0.589);
+}
+.card-name{
+  background-image: url('../public/assets/white.png');
+  background-color: rgba(255, 0, 0, 0.5);
+  background-position: center;
+  background-repeat: repeat;
+  background-size: contain;
+}
+.card-value {
+  border: rgba(255, 194, 9, 0.589) dotted;
+  margin-top: 30px;
+  padding-left: 10px;
+  background: #fff;
+}
+
+@media only screen and (min-width: 968px)  {
+  .card-value{
+    width: 600px
+  }
+  
+}
+
+.header{
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 90px;
+  width: 100%;
+  position: absolute;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.footer{
+  background-color: #eab308;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  bottom: 0 ;
+  height: 80px;
+  width: 100%;
+  position: absolute;
+  border-radius: 50px;
 }
