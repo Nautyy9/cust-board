@@ -1,39 +1,36 @@
-import React, {useState, useRef,} from 'react';
+import React, {useState, useRef, useContext, useEffect,} from 'react';
 import {useNavigate} from "react-router-dom"
 import QrReader from 'react-qr-reader';
-import { Button, Card, CardMedia} from '@mui/material';
+import { Button, Card} from '@mui/material';
+import { ApisContext } from '../Context';
+import axios from 'axios';
 
 
-function Qr({scanResultFile,scanResultWebCam, setScanResultFile,setScanResultWebCam}) { 
+function Qr({scanResultWebCam, scanResultFile, setScanResultFile,setScanResultWebCam}) { 
   const [state, setState] = useState(false)
+
+  const  values = useContext(ApisContext);
+  const {client} = values;
   const nav = useNavigate()
 
   
   
   const qrRef = useRef(null);
 
-
-//   const generateQrCode = async () => {
-//     try {
-//           const response = await QRCode.toDataURL(text);
-//           setImageUrl(response);
-//     }catch (error) {
-//       console.log(error);
-//     }
-//   }
   const handleErrorFile = (error) => {
     console.log(error);
   }
   const handleScanFile = (result) => {
       if (result) {
-         
-          setScanResultFile(result);
+        // console.log(result);
+        const val = JSON.parse(result);
+        // console.log(val);
+          setScanResultFile(val);
           nav('./orders')
           
       }
   }
   const onScanFile = () => {
-
     qrRef.current.openImageDialog();
   }
   const handleErrorWebCam = (error) => {
@@ -44,14 +41,16 @@ function Qr({scanResultFile,scanResultWebCam, setScanResultFile,setScanResultWeb
       
     if (result){
         setScanResultWebCam(result);
+        // console.log(result);
         nav('./orders')
     }
    }
   return (
-    <div className='design'  >
-    <Card className='card-name ' >
-                         <div className=" flex flex-col items-center justify-center mt-10 ">
-                            <Button className="" variant="contained" color="primary" onClick={onScanFile}>Select Qr Code</Button>
+    <div className='design my-4  overflow-x-hidden '  >
+    <Card className='card-name xl:w-1/4' >
+    {console.log(client)}
+                         <div className=" flex flex-col items-center justify-center  md:mt-10">
+                            <Button className="" variant="contained" color="primary" sx={{mt: 4}} onClick={onScanFile}>Select Qr Code</Button>
                                 <QrReader
                                   ref={qrRef}
                                   delay={300}
@@ -74,7 +73,7 @@ function Qr({scanResultFile,scanResultWebCam, setScanResultFile,setScanResultWeb
                               <h3 className='mb-10'>Scanned By WebCam Code: <br/> {state ? (<div>
                                   {scanResultWebCam}
                               </div>) : (<>
-                                  <Button variant='contained' className='' color='error'><b>! Camera Not Found</b></Button>
+                                  <Button variant='contained' className=''  color='error'><b>! Camera Not Found</b></Button>
                               </>)}
                               </h3>
                          
@@ -103,10 +102,10 @@ function Qr({scanResultFile,scanResultWebCam, setScanResultFile,setScanResultWeb
 
                     <div className="flex flex-row">
                       <div
-                        class="number flex flex-col items-center m-1 p-1  justify-center w-6 h-6 mr-2 text-md font-semibold rounded-full text-txt">
+                        className="number flex flex-col items-center m-1 p-1  justify-center w-6 h-6 mr-2 text-md font-semibold rounded-full text-txt">
                         3
                       </div>
-                      <p class="text-base font-semibold  text-opacity-10 2xl:text-xl text-txt-light">
+                      <p className="text-base font-semibold  text-opacity-10 2xl:text-xl text-txt-light">
                         Congratulation, You are now Paired with Smart Cart
                       </p>
                     </div>
