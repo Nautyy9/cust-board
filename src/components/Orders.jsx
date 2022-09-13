@@ -12,7 +12,7 @@ import { ApisContext } from '../Context';
 
 function Orders({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate}) {
 
-  const {conData, setConData} = useContext(ApisContext)
+  const {conData} = useContext(ApisContext)
   
   const [data, setData] = useState({
     Orders: [],
@@ -178,6 +178,7 @@ async function itemID_data() {
     const data =  response;
     console.log('6',data);
     setMainData(data.data.data.items);
+    setPrice(data.data.data.items[0].warehouses.ASP)
     setData(prev=>({
         ...prev,
           Length: data.data.data.items.length
