@@ -10,7 +10,7 @@ import Context from "./Context.jsx";
 function App() {
 
   
-  const [price , setPrice] = useState(305)
+  const [price , setPrice] = useState()
   const [scanResultFile, setScanResultFile] = useState('');
   const [scanResultWebCam, setScanResultWebCam] =  useState('');
   const [rate , setRate] = useState(90000)
