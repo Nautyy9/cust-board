@@ -1,6 +1,6 @@
 import Qr from "./components/Qr.jsx";
 import {BrowserRouter , Route, Routes} from 'react-router-dom'
-import { useContext,  useState } from "react";
+import {  useState } from "react";
 import Orders from "./components/Orders.jsx";
 import NotFound from "./components/NotFound.jsx";
 import Payment from "./components/Payment.jsx";

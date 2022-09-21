@@ -15,21 +15,24 @@ function Context({children}) {
   
   const [token, setToken] = useState()
   // const [client, setClient] = useState()
+  const [msg, setMsg] = useState();
   
   useEffect(() => {
     MQTTConnect();
     return () => {   
       MQTTConnect()
     }
-    
+    //eslint-disable-next-line
   },[])
 
   function onMessageArrived(msg, pay) {
     if(msg && pay){
+      const slicedMessage =  msg.slice(26);
+      setMsg(slicedMessage);
       const uni = new TextDecoder().decode(pay);
       const json = JSON.parse(uni) 
         console.log(json);
-        setConData(json)
+        setConData(json);
       // console.log('newwwww', msg, pay);
     }
     else{
@@ -54,11 +57,11 @@ function Context({children}) {
     //set.send("admin/cartv1/token", localStorage.getItem("UserToken"), 0, false)
     }
     function onFailure() {
-      console.log("Connection Attempt to Host " + host + "Failed");
+      alert("Connection Attempt to Host " + host + "Failed");
       setTimeout (MQTTConnect,reconnectTimeout);
     } 
     function reconnectTimeout () {
-      console.log('Connection Lost');
+      alert('Connection Lost');
       MQTTConnect()
     }
 
@@ -92,14 +95,16 @@ function Context({children}) {
       // set.connect(`mqtt://${host}:${port}/mqtt`,options)
       // set.onMessageArrived = onMessageArrived;
       // set.onConnectionLost= onConnectionLost
-      console.log(client);
+      // console.log(client);
     }
 
     var val = {
         token,
         setToken,
         conData,
-        setConData
+        setConData,
+        msg,
+        setMsg
     }
 
   return (

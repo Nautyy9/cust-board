@@ -2,6 +2,7 @@
   "name": "customer-store",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://dev.djtretailers.com",
   "dependencies": {
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",

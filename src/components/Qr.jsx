@@ -1,9 +1,9 @@
-import React, {useState, useRef, useContext, useEffect,} from 'react';
+import React, {useState, useRef, useContext} from 'react';
 import {useNavigate} from "react-router-dom"
 import QrReader from 'react-qr-reader';
 import { Button, Card} from '@mui/material';
 import { ApisContext } from '../Context';
-import axios from 'axios';
+
 
 
 function Qr({scanResultWebCam, scanResultFile, setScanResultFile,setScanResultWebCam}) { 

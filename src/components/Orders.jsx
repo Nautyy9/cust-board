@@ -12,7 +12,7 @@ import { ApisContext } from '../Context';
 
 function Orders({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate}) {
 
-  const {conData} = useContext(ApisContext)
+  const {conData, } = useContext(ApisContext)
   
   const [data, setData] = useState({
     Orders: [],
@@ -23,18 +23,26 @@ function Orders({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate
   })
   const [token , setToken] = useState()
   const [details , setDetails] = useState()
-  const [mainData, setMainData] = useState();
+  const [itemData, setItemData] = useState();
   const [accessToken, setAccessToken] = useState('')
   
   const nav = useNavigate();
 
   useEffect(() => {
-    barcode_data();
-    itemID_data();
+    var subscribe = true;
 
-    return () =>{
+    if(subscribe)
+    {
       barcode_data();
       itemID_data();
+    
+    }
+    // wallet_details();
+
+    return () =>{
+     subscribe = false;
+      // wallet_details();
+
     }
     
   }, [accessToken, conData])
@@ -63,15 +71,22 @@ function Orders({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate
   const rate = localStorage.getItem('rate');
   setRate(rate);
   window.onload = () => nav('/')
-        user_details();
-        token_generator();
-        user_collection();
-        //wallet_details();
-        // barcode_data();
-        // itemID_data();
-        // eslint-disable-next-line
+       
   }, []);
   
+
+  useEffect(() => {
+
+    var subscribe = true;
+    if(subscribe){
+    user_details();
+    token_generator();
+    user_collection();
+    }
+    return() => {
+      subscribe = false;
+    }
+  }, [conData])
   
   const db = database; 
 
@@ -89,7 +104,7 @@ async function user_details () {
     setDetails(data);
   }
   catch{
-    console.log('error in fetching user detals');
+    console.log('error in fetching user details');
   }
 }
 
@@ -104,7 +119,7 @@ async function token_generator() {
   // localStorage.setItem("access_token", data.data.access_token)
   setToken(data.data)
   setAccessToken(data.data.access_token)
-  console.log(data.data, 'at');
+  // console.log(data.data, 'at');
   }
   catch{
     console.log('error in token generation');
@@ -116,7 +131,7 @@ async function user_collection() {
   try{
     const response = await axios.post('http://192.168.1.192:85/api/user_collection', token)
     const data =  response;
-    //console.log('3',data);
+    console.log('3',data);
 
   setData(prev => ({
     ...prev,
@@ -129,12 +144,15 @@ async function user_collection() {
 }
 // async function wallet_details() {
 //   try{
-//     const response = await  axios.get(`http://dev.djtretailers.com/v2/wallet/admin/mobile?mobile=${scanResultFile.data.mobile || scanResultWebCam.data.mobile}`,{mode: 'cors'},{
-//       headers : {Authorization: `Bearer ${localStorage.getItem('access_token')}`},
+//     const response = await  axios.get(`http://dev.djtretailers.com/v2/wallet/admin/mobile?mobile=9999999999`,{mode: 'cors'},{
+//       headers: {
+//         Authorization: `Bearer ${accessToken}`
+//       },
 //       withCredentials: 'true'
 //     })
 //     const data =  response;
-//     //console.log('4',data);
+//     // console.log('4',data);
+//     // console.log(accessToken);
 //   setData(prev => ({
 //     ...prev,
 //     orderId: data.data.order_id
@@ -153,31 +171,39 @@ async function barcode_data() {
       }
     })
     const data =  response;
-    console.log('5',data);
+    // console.log(conData.product_id);
+      console.log('5',data);
+    // setMainData(data.data.data.items);
+    // setPrice(data.data.data.items[0].warehouses.ASP)
+    // setData(prev=>({
+    //     ...prev,
+    //       Length: data.data.data.items.length
+    // }))
   }
   catch{
     console.log('error in getting wallet details');
   }
 }
 async function itemID_data() {
+  
+  console.log(conData.product_id);
   try{
     const response = await  axios.post('http://api.djtretailers.com/item/adminitems/?page_number=100&page_size=1',{
 
       "export": false,
       "search": "number",
-      "value": conData.product_id,
+      "value": `${conData.product_id}`,
       "warehouse": "STR01"
     
     }, {
       
       headers: {
-        Authorization: `Bearer ${accessToken }`
+        Authorization: `Bearer ${accessToken}`
       }
     })
-
     const data =  response;
-    console.log('6',data);
-    setMainData(data.data.data.items);
+     console.log('6', data);
+    setItemData(data.data.data.items);
     setPrice(data.data.data.items[0].warehouses.ASP)
     setData(prev=>({
         ...prev,
@@ -185,8 +211,8 @@ async function itemID_data() {
     }))
     
   }
-  catch{
-    console.log('error in getting wallet details');
+  catch(err){
+    console.log(err);
   }
 }
   
@@ -291,7 +317,7 @@ async function itemID_data() {
 
       </header>
       <main className=''>
-         {(scanResultFile || scanResultWebCam) ? <ModalValue orders={mainData} qty={conData} price={price} length={data.Length} />: <h1 className='absolute flex left-0 right-0 top-28 '>Qr Code Not Found!</h1> 
+         {(scanResultFile || scanResultWebCam) ? <ModalValue orders={itemData} userId={data.userId} barcodeData={conData} price={price} length={data.Length} />: <h1 className='absolute flex left-0 right-0 top-28 '>Qr Code Not Found!</h1> 
          }
       </main>
       <footer className='footer flex-col flex sm:flex-row'>
