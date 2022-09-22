@@ -48,7 +48,7 @@ function Popup({open, setOpen}) {
             Error in fetching Cart Please try again or reload the page
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            hellow user i don't have any text left to write
+            hellow user i don't have any text left to write 
           </Typography>
         </Box>
       </Modal>
