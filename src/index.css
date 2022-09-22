@@ -71,10 +71,10 @@ body{
   background-color: #eab308;
   align-items: center;
   justify-content: center;
-  bottom: 0 ;
+  
   height: 90px;
   width: 100%;
-  position: absolute;
+  position: relative;
   border-radius: 50px;
 
 }

@@ -1,16 +1,15 @@
 
-import React, { useContext, useEffect, useMemo, useState } from 'react'
-import {database} from '../components/firebase'
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { Link, useNavigate } from 'react-router-dom';
 import ModalValue from './ModalValue';
 import axios from 'axios';
-
 import { ApisContext } from '../Context';
 
 
 
-function Orders({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate}) {
+
+const Orders = ({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate}) => {
 
   const {conData, } = useContext(ApisContext)
   
@@ -25,8 +24,124 @@ function Orders({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate
   const [details , setDetails] = useState()
   const [itemData, setItemData] = useState();
   const [accessToken, setAccessToken] = useState('')
+
+
+  const  json = useMemo(() =>  ({
+    "data": (scanResultFile.data || scanResultWebCam.data)
+  }), [scanResultFile, scanResultWebCam])
+    
+  
+  
   
   const nav = useNavigate();
+
+  const user_details= React.useCallback(async() => {
+    // console.log("this is what i need",scanResultFile.data);
+    try{
+      const response = await axios.post('http://192.168.1.192:85/api/user_details', (scanResultFile || scanResultWebCam))
+      const data =  response
+      //console.log('1',data);
+  
+      setDetails(data);
+    }
+    catch{
+      console.log('error in fetching user details');
+    }
+  }, [scanResultFile,scanResultWebCam])
+
+  const token_generator = React.useCallback(async() => {
+  
+    try{
+      const response = await axios.post(`http://api.djtretailers.com/smartauth/toke-generator/`, json)
+    const data =  response;
+    // console.log("another one",data.data);
+   // console.log('2',data);
+  
+    // localStorage.setItem("access_token", data.data.access_token)
+    setToken(data.data)
+    setAccessToken(data.data.access_token)
+    // console.log(data.data, 'at');
+    }
+    catch{
+      console.log('error in token generation');
+    }
+  }, [json]);
+
+  const user_collection = React.useCallback(async() =>{
+  
+    try{
+      const response = await axios.post('http://192.168.1.192:85/api/user_collection', token)
+      const data =  response;
+      console.log('3',data);
+  
+    setData(prev => ({
+      ...prev,
+      userId: data.data.order_id
+     }))
+    }
+    catch{
+      console.log('error in getting user collection');
+    }
+  }, [token]);
+
+  const  itemID_data =  useCallback(async() =>  {
+  
+    console.log(conData.product_id);
+    try{
+      const response = await  axios.post('http://api.djtretailers.com/item/adminitems/?page_number=100&page_size=1',{
+  
+        "export": false,
+        "search": "number",
+        "value": `${conData.product_id}`,
+        "warehouse": "STR01"
+      
+      }, {
+        
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
+      const data =  response;
+       console.log('6', data);
+      setItemData(data.data.data.items);
+      setPrice(data.data.data.items[0].warehouses.ASP)
+      setData(prev=>({
+          ...prev,
+            Length: data.data.data.items.length
+      }))
+      
+    }
+    catch(err){
+      console.log(err);
+    }
+  }, [ conData, setPrice]);
+
+const  barcode_data = useCallback(async() => {
+    try{
+      const response = await  axios.get(`http://api.djtretailers.com/collection/getsingleitem?search=barcode&value=${conData.product_id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
+      const data =  response;
+      // console.log(conData.product_id);
+        console.log('5',data);
+      // setMainData(data.data.data.items);
+      // setPrice(data.data.data.items[0].warehouses.ASP)
+      // setData(prev=>({
+      //     ...prev,
+      //       Length: data.data.data.items.length
+      // }))
+    }
+    catch{
+      console.log('error in getting wallet details');
+    }
+  }, [accessToken, conData])
+  
+  
+    
+  
+  
 
   useEffect(() => {
     var subscribe = true;
@@ -45,7 +160,7 @@ function Orders({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate
 
     }
     
-  }, [accessToken, conData])
+  }, [conData])
 
   useEffect(() => {
 
@@ -72,10 +187,11 @@ function Orders({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate
   setRate(rate);
   window.onload = () => nav('/')
        
-  }, []);
+  }, [setRate, nav]);
   
 
   useEffect(() => {
+    console.log('yohohoho');
 
     var subscribe = true;
     if(subscribe){
@@ -88,60 +204,9 @@ function Orders({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate
     }
   }, [conData])
   
-  const db = database; 
 
-const  json = {
-  "data": (scanResultFile.data || scanResultWebCam.data)
-}
-  
-async function user_details () {
-  // console.log("this is what i need",scanResultFile.data);
-  try{
-    const response = await axios.post('http://192.168.1.192:85/api/user_details', (scanResultFile || scanResultWebCam))
-    const data =  response
-    //console.log('1',data);
 
-    setDetails(data);
-  }
-  catch{
-    console.log('error in fetching user details');
-  }
-}
 
-async function token_generator() {
-  
-  try{
-    const response = await axios.post(`http://api.djtretailers.com/smartauth/toke-generator/`, json)
-  const data =  response;
-  // console.log("another one",data.data);
- // console.log('2',data);
-
-  // localStorage.setItem("access_token", data.data.access_token)
-  setToken(data.data)
-  setAccessToken(data.data.access_token)
-  // console.log(data.data, 'at');
-  }
-  catch{
-    console.log('error in token generation');
-  }
-}
-
-async function user_collection() {
-  
-  try{
-    const response = await axios.post('http://192.168.1.192:85/api/user_collection', token)
-    const data =  response;
-    console.log('3',data);
-
-  setData(prev => ({
-    ...prev,
-    userId: data.data.order_id
-   }))
-  }
-  catch{
-    console.log('error in getting user collection');
-  }
-}
 // async function wallet_details() {
 //   try{
 //     const response = await  axios.get(`http://dev.djtretailers.com/v2/wallet/admin/mobile?mobile=9999999999`,{mode: 'cors'},{
@@ -163,59 +228,6 @@ async function user_collection() {
 //   }
 // }
 
-async function barcode_data() {
-  try{
-    const response = await  axios.get(`http://api.djtretailers.com/collection/getsingleitem?search=barcode&value=${conData.product_id}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
-    })
-    const data =  response;
-    // console.log(conData.product_id);
-      console.log('5',data);
-    // setMainData(data.data.data.items);
-    // setPrice(data.data.data.items[0].warehouses.ASP)
-    // setData(prev=>({
-    //     ...prev,
-    //       Length: data.data.data.items.length
-    // }))
-  }
-  catch{
-    console.log('error in getting wallet details');
-  }
-}
-async function itemID_data() {
-  
-  console.log(conData.product_id);
-  try{
-    const response = await  axios.post('http://api.djtretailers.com/item/adminitems/?page_number=100&page_size=1',{
-
-      "export": false,
-      "search": "number",
-      "value": `${conData.product_id}`,
-      "warehouse": "STR01"
-    
-    }, {
-      
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
-    })
-    const data =  response;
-     console.log('6', data);
-    setItemData(data.data.data.items);
-    setPrice(data.data.data.items[0].warehouses.ASP)
-    setData(prev=>({
-        ...prev,
-          Length: data.data.data.items.length
-    }))
-    
-  }
-  catch(err){
-    console.log(err);
-  }
-}
-  
 
 
 // ---> Firebase 
@@ -298,6 +310,8 @@ async function itemID_data() {
   //    orderId(data)
   //   });
   // },[db, scanResultFile, scanResultWebCam,id])
+//  const db = database; 
+
 
  
   return (
@@ -317,7 +331,7 @@ async function itemID_data() {
 
       </header>
       <main className=''>
-         {(scanResultFile || scanResultWebCam) ? <ModalValue orders={itemData} userId={data.userId} barcodeData={conData} price={price} length={data.Length} />: <h1 className='absolute flex left-0 right-0 top-28 '>Qr Code Not Found!</h1> 
+         {(scanResultFile || scanResultWebCam) ? <ModalValue orders={itemData} item_data={itemID_data} userId={data.userId} barcodeData={conData} price={price} length={data.Length} />: <h1 className='absolute flex left-0 right-0 top-28 '>Qr Code Not Found!</h1> 
          }
       </main>
       <footer className='footer flex-col flex sm:flex-row'>
