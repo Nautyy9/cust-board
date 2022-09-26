@@ -1,5 +1,5 @@
 import { Avatar, Box, Container, Rating, } from '@mui/material'
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 
 import {  } from '@mui/system'
 import axios from 'axios';
@@ -11,13 +11,14 @@ import Loading from './Loading';
 import Popup from './Popup';
 
 
-function  ModalValue  ({ orders, barcodeData, userId, item_data, price, length}) {
+function  ModalValue  ({ orders, barcodeData, userId, item_data, price, length, dbData, setDbData}) {
 
-  const {setMsg, msg, conData} = useContext(ApisContext)
+  const {setMsg, msg, conData} = useContext(ApisContext);
+  const indRef = useRef()
   
   console.log( conData);
 
-const [dbData, setDbData] = useState() 
+
 const [popUp, setPopUp] = useState(false);
 const [checkDb, setCheckDb] = useState(false);
 const [chai, setChai] = useState(false);
@@ -97,7 +98,7 @@ const asp = evalOrders.warehouses.ASP;
 const mrp = evalOrders.warehouses.MRP;
 const barcode = evalOrders.barcode[0].barcode;
 console.log("userID", userId,"hsn",hsn,"name", name,"image_url", image_url,"tax", tax_code,"item_varient", item_varient,"asp", asp,"mrp", mrp ,"barcode", barcode);
-
+console.log(indRef, 'dhfkjjkdjhjdhfjkh');
 try{
   const response = await axios.post('http://192.168.1.192:85/api/remove_item', {
       "order_id": `${userId}`,
@@ -122,7 +123,8 @@ try{
       
 })
   const data =  response;
-  console.log('modal value data',data);
+  
+  console.log( 'suii',data.data.order_data);
   setDbData(data)
   }
   catch(err) {
@@ -187,7 +189,7 @@ console.log(userId);
         <div className='relative grid w-full mt-10 mb-10 overflow-auto bg-white shadow-lg rounded-xl border border-gray-200 '>
           <table className=' table-auto my-4'> 
            
-            { popUp ?  <Container  className='text-lg font-sans  grid grid-flow-row 'sx={{maxHeight: 600, overflowX: 'auto' , overflowY: 'auto'}}>
+            {  <Container  className='text-lg font-sans  grid grid-flow-row 'sx={{maxHeight: 600, overflowX: 'auto' , overflowY: 'auto'}}>
               <tr className='grid grid-flow-col justify-items-center  my-2'>
                 
                   <th className='list-outside   '><span className='font-serif '> Item </span></th>
@@ -202,7 +204,7 @@ console.log(userId);
 
               { (checkDb) ? dbData?.data.order_data.item_data.map((val,ind) =>(
                console.log("got the data", dbData.data.order_data.item_data),
-                <Box key={ind} sx={{mx: 0, display: 'grid',gridAutoFlow: 'column', gridColumn: 12, justifyContent: 'stretch',  alignItems: 'center'}} >
+                <Box  ref={indRef}  key={ind} sx={{mx: 0, display: 'grid',gridAutoFlow: 'column', gridColumn: 12, justifyContent: 'stretch',  alignItems: 'center'}} >
                 
 
                     
@@ -234,7 +236,7 @@ console.log(userId);
 
               </ul> */}
             </Container>
-            : <Popup setOpen={setPopUp} open={!popUp}/>}
+           }
           </table>
         </div>
     </div>

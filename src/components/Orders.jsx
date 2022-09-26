@@ -9,7 +9,7 @@ import { ApisContext } from '../Context';
 
 
 
-const Orders = ({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate}) => {
+const Orders = ({scanResultFile,scanResultWebCam ,price,dbData, setDbData, setPrice, balance, setBalance, pricing, setPricing}) => {
 
   const {conData, } = useContext(ApisContext)
   
@@ -24,12 +24,13 @@ const Orders = ({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate
   const [details , setDetails] = useState()
   const [itemData, setItemData] = useState();
   const [accessToken, setAccessToken] = useState('')
-
+  
+  
 
   const  json = useMemo(() =>  ({
     "data": (scanResultFile.data || scanResultWebCam.data)
   }), [scanResultFile, scanResultWebCam])
-    
+ 
   
   
   
@@ -114,7 +115,7 @@ const Orders = ({scanResultFile,scanResultWebCam ,price, setPrice, rate, setRate
     catch(err){
       console.log(err);
     }
-  }, [ conData, setPrice]);
+  }, [conData, setPrice]);
 
 const  barcode_data = useCallback(async() => {
     try{
@@ -137,28 +138,23 @@ const  barcode_data = useCallback(async() => {
       console.log('error in getting wallet details');
     }
   }, [accessToken, conData])
-  
-  
-    
-  
-  
+
 
   useEffect(() => {
-    var subscribe = true;
+   
 
-    if(subscribe)
-    {
+    
       barcode_data();
       itemID_data();
+      user_details();
+      token_generator();
+      user_collection();
     
-    }
     // wallet_details();
 
-    return () =>{
-     subscribe = false;
       // wallet_details();
 
-    }
+    
     
   }, [conData])
 
@@ -184,26 +180,52 @@ const  barcode_data = useCallback(async() => {
   //   localStorage.setItem("freeItem",freeItem )
 
   const rate = localStorage.getItem('rate');
-  setRate(rate);
+  setBalance(rate);
+  
   window.onload = () => nav('/')
        
-  }, [setRate, nav]);
+  }, [setBalance, nav]);
   
+  useEffect(() =>{
 
-  useEffect(() => {
-    console.log('yohohoho');
+    const calculateTotal = ()=> {
 
-    var subscribe = true;
-    if(subscribe){
-    user_details();
-    token_generator();
-    user_collection();
+
+      let sum =0;
+      let sumAsp = 0;
+      let sumMrp = 0;
+    
+      let total = dbData?.data.order_data.item_data.reduce((prevValue , currentValue) => {
+      let rates = prevValue?.item_total;
+      let itemTotal = currentValue?.item_total ;
+      let mrpTotal = currentValue?.unit_price.mrp * currentValue?.fulfilled_quantity
+      let aspTotal = currentValue?.unit_price.asp * currentValue?.fulfilled_quantity;
+      sumAsp += aspTotal
+      sumMrp += mrpTotal;
+      sum += itemTotal;
+      console.log(sum, sumAsp, sumMrp);
+    
+      
+      return ({sum, sumAsp, sumMrp}) 
+    }, {rates: 0, currentValue: 0})
+     
+    
+      setPricing(prev => ({
+        ...prev,
+        totalMrp: total?.sumMrp,
+        totalAsp: total?.sumAsp,
+        totalSp: total?.sum
+      }))
     }
+
+    calculateTotal();
     return() => {
-      subscribe = false;
+      calculateTotal();
     }
-  }, [conData])
-  
+    
+  }, [dbData, setPricing])
+
+
 
 
 
@@ -313,7 +335,6 @@ const  barcode_data = useCallback(async() => {
 //  const db = database; 
 
 
- 
   return (
     <div >
 
@@ -325,19 +346,19 @@ const  barcode_data = useCallback(async() => {
           <h1 className='flex flex-col text-center sm:flex-row relative justify-end text-sm items-center sm:text-lg font-bold'> 
           <img src={require('../assets/wallet-3.png') } alt="wallet" className='sm:mr-3'></img>Wallet Balance 
             <span className='text-green-700 m-1 text-2xl mr-2 sm:ml-4'>
-            ₹{rate}
+            ₹{balance}
             </span>
           </h1>
 
       </header>
       <main className=''>
-         {(scanResultFile || scanResultWebCam) ? <ModalValue orders={itemData} item_data={itemID_data} userId={data.userId} barcodeData={conData} price={price} length={data.Length} />: <h1 className='absolute flex left-0 right-0 top-28 '>Qr Code Not Found!</h1> 
+         {(scanResultFile || scanResultWebCam) ? <ModalValue orders={itemData} dbData={dbData} setDbData={setDbData} item_data={itemID_data} userId={data.userId} barcodeData={conData} price={price} length={data.Length} />: <h1 className='absolute flex left-0 right-0 top-28 '>Qr Code Not Found!</h1> 
          }
       </main>
       <footer className='footer flex-col flex sm:flex-row'>
         <div className='flex flex-col'>
-            <h1 className='font-bold text-sm  sm:text-2xl sm:mr-20 xl:mr-20'>Cart Total Balance ₹ {(scanResultFile || scanResultWebCam) || conData.quantity > '0'? price*conData.quantity : ''}</h1>
-            <h1 className='font-bold text-sm  sm:text-2xl sm:mr-20 xl:mr-20'>Total Saving ₹  {(scanResultFile || scanResultWebCam)? localStorage.getItem('rate'): ''}</h1>
+            <h1 className='font-bold text-sm  sm:text-2xl sm:mr-20 xl:mr-20'>Cart Total Balance ₹ {(scanResultFile || scanResultWebCam) || conData.quantity > '0'? pricing.totalSp : 's'}</h1>
+            <h1 className='font-bold text-sm  sm:text-2xl sm:mr-20 xl:mr-20 '>Total Saving ₹  <span className='text-green-600'>{(scanResultFile || scanResultWebCam) && Math.round(pricing.totalMrp - pricing.totalAsp)}</span></h1>
         </div>
         <div>
           {(scanResultFile || scanResultWebCam) ? <Link to='/payment'  className='bg-black hover:bg-white hover:text-black text-white w-48 h-10 sm:h-12 rounded-full p-1 flex justify-center items-center'>Proceed to pay

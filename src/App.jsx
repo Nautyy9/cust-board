@@ -10,11 +10,16 @@ import Context from "./Context.jsx";
 function App() {
 
   
-  const [price , setPrice] = useState()
+  
   const [scanResultFile, setScanResultFile] = useState('');
   const [scanResultWebCam, setScanResultWebCam] =  useState('');
-  const [rate , setRate] = useState(90000)
-
+  const [balance , setBalance] = useState(90000)
+  const [pricing, setPricing] = useState({
+    totalSp: 0,
+    totalAsp: 0,
+    totalMrp : 0
+  })
+  const [dbData, setDbData] = useState();
   return (
     
       <Context>
@@ -22,9 +27,9 @@ function App() {
       <BrowserRouter>
       <Routes>
         <Route path="/" element={<Qr scanResultFile={scanResultFile} setScanResultFile={setScanResultFile} scanResultWebCam={scanResultWebCam} setScanResultWebCam={setScanResultWebCam}/>}/>
-        <Route path="/orders" element={<Orders rate={rate} setRate={setRate} scanResultFile={scanResultFile} setScanResultFile={setScanResultFile} scanResultWebCam={scanResultWebCam} setScanResultWebCam={setScanResultWebCam} price={price} setPrice ={setPrice}/>}></Route>
-        <Route path='/payment' element={<Payment rate={rate} setRate={setRate} scanResultFile={scanResultFile} setScanResultFile={setScanResultFile} scanResultWebCam={scanResultWebCam} setScanResultWebCam={setScanResultWebCam} price={price} setPrice ={setPrice}/>}></Route>
-        <Route path='/payment/success' element={<Success rate={rate} setRate={setRate}></Success>}></Route>
+        <Route path="/orders" element={<Orders dbData={dbData} setDbData={setDbData} pricing={pricing} setPricing={setPricing} balance={balance} setBalance={setBalance} scanResultFile={scanResultFile} setScanResultFile={setScanResultFile} scanResultWebCam={scanResultWebCam} setScanResultWebCam={setScanResultWebCam} />}></Route>
+        <Route path='/payment' element={<Payment dbData={dbData} setDbData={setDbData} pricing={pricing} setPricing={setPricing} balance={balance} setBalance={setBalance} scanResultFile={scanResultFile} setScanResultFile={setScanResultFile} scanResultWebCam={scanResultWebCam} setScanResultWebCam={setScanResultWebCam} />}></Route>
+        <Route path='/payment/success' element={<Success balance={balance} setBalance={setBalance}></Success>}></Route>
         <Route path='*' element={<NotFound/>}></Route>
       </Routes>
       </BrowserRouter>

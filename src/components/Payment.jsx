@@ -1,10 +1,13 @@
 import {  Card } from '@mui/material'
 import axios from 'axios'
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import {  useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { ApisContext } from '../Context'
 
-function Payment({ scanResultFile, setScanResultWebCam, price , setPrice ,rate, setRate}) {
+function Payment({ scanResultFile, setScanResultWebCam, dbData, setDbData, pricing, setPricing ,balance, setBalance}) {
+
+  const { conData} = useContext(ApisContext)
 
 useEffect(() => {
   axios.post('http://dev.djtretailers.com/v2/wallet/admin/debit',{
@@ -25,7 +28,16 @@ useEffect(() => {
   .catch(err => {
     console.log(err);
   })
-}, [])
+}, []);
+
+
+useEffect(() => {
+
+  if(dbData) {
+      nav('/orders')
+  }
+
+}, [conData])
 
 
   
@@ -40,13 +52,14 @@ useEffect(() => {
    }
 }, [])
 
-
+console.log(pricing, balance);
 
 const handleDeerika = (e) =>{
   e.preventDefault()
-  if(price <= rate) {
-    setRate(rate = rate - price);
-    localStorage.setItem("rate", rate);
+ 
+  if(pricing.totalSp <= balance) {
+    setBalance(balance = balance - pricing.totalSp);
+    localStorage.setItem("rate", balance);
      setTimeout(() => {nav('./success')}, [1000]);
  
     // setTimeout(() => nav('/'), [5000])
@@ -58,11 +71,11 @@ const handleDeerika = (e) =>{
 
 const handleSubmit = (e) =>{
   e.preventDefault();
-  if(price){
+  if(pricing.totalSp){
     const options = {
       key: 'rzp_test_ikLbxNSOmFmSXL',
       key_secret: 'WPbKnWFmlzPs9XcrxswLSNrs',
-      amount: price * 100,
+      amount: pricing.totalSp * 100,
       currency: 'INR',
       name: 'Payment Gateway',
       description: 'testing',
@@ -102,7 +115,7 @@ const handleSubmit = (e) =>{
         <img src={require('../assets/wallet-3.png') } alt="wallet" className='sm:mr-3'></img>Wallet Balance 
         
          <span className='text-green-700 text-sm md:text-2xl ml-1 sm:ml-4 '>
-         ₹ {rate}
+         ₹ {Math.round(balance)}
         </span>
          </h1>
             
@@ -112,7 +125,7 @@ const handleSubmit = (e) =>{
     {scanResultFile ? <Card  className='  cardValue w-full sm:w-1/2 lg:w-1/3 h-40 grid grid-flow-col grid-cols-2 relative justify-start '>
         <div className='col-span-1 grid'>
         <h1 className='text-2xl font-bold grid justify-center items-center'>Amount to be Paid</h1>
-        <h1 className='text-green-700 font-bold text-2xl grid justify-center mr-10 items-start '>₹{price}</h1>
+        <h1 className='text-green-700 font-bold text-2xl grid justify-center mr-10 items-start '>₹{pricing.totalSp}</h1>
         </div>
         <div className='col-auto grid justify-center relative items-center'>
         <img src={require('../assets/wallet-3.png') } alt="wallet" className=' h-14 w-14 sm:mr-3'></img>
